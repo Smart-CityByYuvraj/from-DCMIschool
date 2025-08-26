@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart City Project — Order Flow</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;margin:0;padding:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f5f7fa;color:#111}
+    .card{background:#fff;padding:24px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.1);max-width:500px;width:100%}
+    h1{margin-top:0;font-size:20px}
+    label{display:block;font-size:14px;margin-bottom:4px}
+    input,textarea,select{width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;margin-bottom:12px;font-size:14px}
+    button{background:#1565c0;color:#fff;border:none;padding:12px 18px;border-radius:10px;font-weight:600;cursor:pointer;width:100%}
+    button:hover{background:#0d47a1}
+    table{width:100%;border-collapse:collapse;margin-bottom:16px}
+    th,td{border:1px solid #ddd;padding:8px;text-align:center;font-size:14px}
+    th{background:#f0f0f0}
+    .success{background:#ecfdf5;border:1px solid #d1fae5;padding:12px;border-radius:8px;margin-top:10px;font-size:14px;text-align:center}
+    .error{color:red;font-size:13px;margin:-8px 0 10px 0}
+  </style>
+</head>
+<body>
+<nav style="background:#1565c0; padding:10px; display:flex; gap:20px; border-radius:0 0 100px 10px;  position:fixed; top:0px; left:00px; width:10000px ;">
+    <a href="metaverse website1.html" style="color:#fff; text-decoration:none; font-weight:bold;">India Work Tracker</a>
+    <a href="metaverse website2.html" style="color:#fff; text-decoration:none; font-weight:bold;">Project Info</a>
+    <a href="metaverse website3.html" style="color:#fff; text-decoration:none; font-weight:bold;">Material Required</a>
+    
+  </nav>
+  <!-- Step 1: Fill order details -->
+  <div class="card" id="step1">
+    <h1>Order Smart City Project</h1>
+    <form id="orderForm" novalidate>
+      <label for="name">Full Name</label>
+      <input id="name" required />
+      <div id="errName" class="error"></div>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" required />
+      <div id="errEmail" class="error"></div>
+
+      <label for="phone">Phone Number</label>
+      <input id="phone" type="tel" required />
+      <div id="errPhone" class="error"></div>
+
+      <label for="address">Address</label>
+      <textarea id="address" rows="2" required></textarea>
+      <div id="errAddress" class="error"></div>
+
+      <label for="quantity">Quantity</label>
+      <input id="quantity" type="number" min="1" value="1" />
+
+      <label for="variant">Package</label>
+      <select id="variant" required>
+        <option value="Basic kit">Basic kit — ₹500</option>
+        <option value="Advanced kit">Advanced kit — ₹1200</option>
+        <option value="School demo package">School demo package — ₹2000</option>
+      </select>
+
+      <button type="submit">Next: See Prices</button>
+    </form>
+  </div>
+
+  <!-- Step 2: Pricing summary -->
+  <div class="card" id="step2" style="display:none">
+    <h1>Pricing Summary</h1>
+    <table>
+      <thead><tr><th>Package</th><th>Base Price</th><th>Quantity</th><th>Subtotal</th></tr></thead>
+      <tbody id="pricingTable"></tbody>
+    </table>
+    <p id="charges"></p>
+    <h3 id="total"></h3>
+    <button id="confirmBtn">Confirm Order</button>
+  </div>
+
+  <!-- Step 3: Confirmation -->
+  <div class="card" id="step3" style="display:none">
+    <h1>Order Placed ✅</h1>
+    <p>Thank you! Your Smart City Project order has been placed successfully.</p>
+    <p>You will receive your package within <strong>5 days</strong>, like Amazon delivery.</p>
+    <div class="success">A WhatsApp message will be sent to +91 9634328003 with your order details.</div>
+  </div>
+
+  <script>
+    const prices = {
+      "Basic kit": 500,
+      "Advanced kit": 1200,
+      "School demo package": 2000
+    };
+
+    let orderData = {};
+
+   // Validation helpers
+function validateGmail(email) {
+  return /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email); 
+}
+
+function validatePhone(phone) {
+  return /^[6-9]\d{9}$/.test(phone); // Indian 10-digit number
+}
+
+function validateAddress(address) {
+  return address.length >= 10; 
+}
+
+    // Step 1 -> Step 2
+    document.getElementById('orderForm').addEventListener('submit', function(ev){
+      ev.preventDefault();
+      let valid = true;
+
+      // Clear errors
+      ['errName','errEmail','errPhone','errAddress'].forEach(id=>document.getElementById(id).textContent='');
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const address = document.getElementById('address').value.trim();
+      const quantity = parseInt(document.getElementById('quantity').value);
+      const variant = document.getElementById('variant').value;
+
+      if(name === ''){ document.getElementById('errName').textContent = 'Name is required'; valid=false; }
+      if (!validateGmail(email)) {
+  document.getElementById('errEmail').textContent = 'Invalid Gmail address (must end with @gmail.com)';
+  valid = false;
+}
+
+if (!validatePhone(phone)) {
+  document.getElementById('errPhone').textContent = 'Invalid phone number (must be 10 digits starting 6–9)';
+  valid = false;
+}
+
+if (!validateAddress(address)) {
+  document.getElementById('errAddress').textContent = 'Invalid location (must be at least 10 characters)';
+  valid = false;
+}
+      if(!valid) return;
+
+      orderData = { name,email,phone,address,quantity,variant };
+
+      const basePrice = prices[variant];
+      const subtotal = basePrice * quantity;
+      const gst = subtotal * 0.05;
+      const otherCharges = 100;
+      const total = subtotal + gst + otherCharges;
+
+      document.getElementById('pricingTable').innerHTML = `
+        <tr>
+          <td>${variant}</td>
+          <td>₹${basePrice}</td>
+          <td>${quantity}</td>
+          <td>₹${subtotal}</td>
+        </tr>
+      `;
+      document.getElementById('charges').textContent = `GST (5%): ₹${gst.toFixed(2)} | Other charges: ₹${otherCharges}`;
+      document.getElementById('total').textContent = `Total Payable: ₹${total.toFixed(2)}`;
+
+      document.getElementById('step1').style.display='none';
+      document.getElementById('step2').style.display='block';
+    });
+
+    // Step 2 -> Step 3
+    document.getElementById('confirmBtn').addEventListener('click', function(){
+      document.getElementById('step2').style.display='none';
+      document.getElementById('step3').style.display='block';
+
+      const whatsappNumber = '919634328003';
+      const msg = `New Order:%0AName: ${orderData.name}%0AEmail: ${orderData.email}%0APhone: ${orderData.phone}%0AAddress: ${orderData.address}%0AQuantity: ${orderData.quantity}%0APackage: ${orderData.variant}`;
+      const waUrl = `https://wa.me/${whatsappNumber}?text=${msg}`;
+      window.open(waUrl, '_blank');
+    });
+  </script>
+</body>
+</html>
